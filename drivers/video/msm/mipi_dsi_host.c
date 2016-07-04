@@ -202,7 +202,7 @@ void mipi_dsi_clk_cfg(int on)
 	mutex_lock(&clk_mutex);
 	if (on) {
 		if (dsi_clk_cnt == 0) {
-			mipi_dsi_prepare_ahb_clocks();
+			mipi_dsi_prepare_clocks();
 			mipi_dsi_ahb_ctrl(1);
 			mipi_dsi_clk_enable();
 		}
@@ -212,9 +212,8 @@ void mipi_dsi_clk_cfg(int on)
 			dsi_clk_cnt--;
 			if (dsi_clk_cnt == 0) {
 				mipi_dsi_clk_disable();
-				mipi_dsi_unprepare_clocks();
 				mipi_dsi_ahb_ctrl(0);
-				mipi_dsi_unprepare_ahb_clocks();
+				mipi_dsi_unprepare_clocks();
 			}
 		}
 	}
@@ -225,7 +224,6 @@ void mipi_dsi_clk_cfg(int on)
 
 void mipi_dsi_turn_on_clks(void)
 {
-	mipi_dsi_prepare_ahb_clocks();
 	mipi_dsi_ahb_ctrl(1);
 	mipi_dsi_clk_enable();
 }
@@ -233,9 +231,7 @@ void mipi_dsi_turn_on_clks(void)
 void mipi_dsi_turn_off_clks(void)
 {
 	mipi_dsi_clk_disable();
-	mipi_dsi_unprepare_clocks();
 	mipi_dsi_ahb_ctrl(0);
-	mipi_dsi_unprepare_ahb_clocks();
 }
 
 static void mipi_dsi_action(struct list_head *act_list)
@@ -1063,7 +1059,7 @@ void mipi_dsi_op_mode_config(int mode)
 }
 
 
-void mipi_dsi_wait4video_done(void)
+static void mipi_dsi_wait4video_done(void)
 {
 	unsigned long flag;
 
@@ -1192,7 +1188,6 @@ int mipi_dsi_cmds_tx(struct dsi_buf *tp, struct dsi_cmd_desc *cmds, int cnt)
 	struct dsi_cmd_desc *cm;
 	uint32 dsi_ctrl, ctrl;
 	int i, video_mode;
-
 	/* turn on cmd mode
 	* for video mode, do not send cmds more than
 	* one pixel line, since it only transmit it
@@ -1240,7 +1235,6 @@ int mipi_dsi_cmds_single_tx(struct dsi_buf *tp, struct dsi_cmd_desc *cmds,
 	int i, j = 0, k = 0, cmd_len = 0, video_mode;
 	char *cmds_tx;
 	char *bp;
-
 	if (tp == NULL || cmds == NULL) {
 		pr_err("%s: Null commands", __func__);
 		return -EINVAL;

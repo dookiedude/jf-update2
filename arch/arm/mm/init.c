@@ -760,9 +760,6 @@ void __init mem_init(void)
 
 	printk(KERN_NOTICE "Virtual kernel memory layout:\n"
 			"    vector  : 0x%08lx - 0x%08lx   (%4ld kB)\n"
-#ifdef CONFIG_ARM_USE_USER_ACCESSIBLE_TIMERS
-			"    timers  : 0x%08lx - 0x%08lx   (%4ld kB)\n"
-#endif
 #ifdef CONFIG_HAVE_TCM
 			"    DTCM    : 0x%08lx - 0x%08lx   (%4ld kB)\n"
 			"    ITCM    : 0x%08lx - 0x%08lx   (%4ld kB)\n"
@@ -783,11 +780,6 @@ void __init mem_init(void)
 
 			MLK(UL(CONFIG_VECTORS_BASE), UL(CONFIG_VECTORS_BASE) +
 				(PAGE_SIZE)),
-#ifdef CONFIG_ARM_USE_USER_ACCESSIBLE_TIMERS
-			MLK(UL(CONFIG_ARM_USER_ACCESSIBLE_TIMER_BASE),
-				UL(CONFIG_ARM_USER_ACCESSIBLE_TIMER_BASE)
-					+ (PAGE_SIZE)),
-#endif
 #ifdef CONFIG_HAVE_TCM
 			MLK(DTCM_OFFSET, (unsigned long) dtcm_end),
 			MLK(ITCM_OFFSET, (unsigned long) itcm_end),
@@ -849,14 +841,6 @@ void free_initmem(void)
 				    "TCM link");
 #endif
 
-#ifdef CONFIG_STRICT_MEMORY_RWX
-	poison_init_mem((char *)__arch_info_begin,
-		__init_end - (char *)__arch_info_begin);
-	reclaimed_initmem = free_area(__phys_to_pfn(__pa(__arch_info_begin)),
-				    __phys_to_pfn(__pa(__init_end)),
-				    "init");
-	totalram_pages += reclaimed_initmem;
-#else
 	poison_init_mem(__init_begin, __init_end - __init_begin);
 	if (!machine_is_integrator() && !machine_is_cintegrator()) {
 		reclaimed_initmem = free_area(__phys_to_pfn(__pa(__init_begin)),
@@ -864,7 +848,6 @@ void free_initmem(void)
 					    "init");
 		totalram_pages += reclaimed_initmem;
 	}
-#endif
 }
 
 #ifdef CONFIG_BLK_DEV_INITRD

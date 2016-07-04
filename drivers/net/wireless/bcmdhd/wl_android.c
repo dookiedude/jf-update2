@@ -2501,13 +2501,7 @@ int wl_android_set_ibss_routetable(struct net_device *dev, char *command, int to
 		err = -EINVAL;
 		goto exit;
 	}
-        if (entries > MAX_IBSS_ROUTE_TBL_ENTRY) {
-                WL_ERR(("Invalid entries number %u\n", entries));
-                err = -EINVAL;
-                goto exit;
-        }
-
-        WL_INFO(("Routing table count:%u\n", entries));
+	WL_INFO(("Routing table count:%d\n", entries));
 	route_tbl->num_entry = entries;
 
 	for (i = 0; i < entries; i++) {
